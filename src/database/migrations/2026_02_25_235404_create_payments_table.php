@@ -12,8 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payments', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+               $table->id();
+
+               $table->foreignId('from_user_id')
+                     ->constrained('users')
+                     ->cascadeOnDelete();
+
+               $table->foreignId('to_user_id')
+                     ->constrained('users')
+                     ->cascadeOnDelete();
+
+               $table->foreignId('colocation_id')
+                     ->constrained()
+                     ->cascadeOnDelete();
+
+               $table->decimal('amount', 10, 2);
+
+               $table->enum('status', ['pending', 'paid'])
+                     ->default('pending');
+
+               $table->timestamps();
+
         });
     }
 
