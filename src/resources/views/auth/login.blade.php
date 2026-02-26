@@ -1,47 +1,162 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<!DOCTYPE html>
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EasyColoc | Create Account</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#050505",
+                        "neutral-dark": "#0a0a0a",
+                        "border-dark": "#1a1a1a",
+                        "primary1": "#e3bc3b",                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+""
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    @keyframes float {
+        0% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+        20% { opacity: 0.6; }
+        80% { opacity: 0.6; }
+        100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+    .floating-dollar {
+        position: fixed;
+        color: #e3bc3b;
+        font-family: 'Material Symbols Outlined';
+        pointer-events: none;
+        z-index: 0;
+        filter: drop-shadow(0 0 10px rgba(227, 188, 59, 0.3));
+    }
+    .central-logo-bg {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 40rem;
+        color: #e3bc3b;
+        opacity: 0.03;
+        pointer-events: none;
+        z-index: 0;
+    }
+</style></head>
+<body class="dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen selection:bg-primary selection:text-background-dark bg-[#050505]"><div class="central-logo-bg material-symbols-outlined">payments</div>
+<div class="fixed inset-0 pointer-events-none overflow-hidden">
+<span class="floating-dollar material-symbols-outlined" style="left: 10%; bottom: -10%; font-size: 24px; animation: float 15s linear infinite;">payments</span>
+<span class="floating-dollar material-symbols-outlined" style="left: 25%; bottom: -15%; font-size: 48px; animation: float 20s linear infinite 2s;">payments</span>
+<span class="floating-dollar material-symbols-outlined" style="left: 40%; bottom: -10%; font-size: 32px; animation: float 18s linear infinite 5s;">payments</span>
+<span class="floating-dollar material-symbols-outlined" style="left: 60%; bottom: -12%; font-size: 56px; animation: float 22s linear infinite 1s;">payments</span>
+<span class="floating-dollar material-symbols-outlined" style="left: 80%; bottom: -10%; font-size: 38px; animation: float 17s linear infinite 8s;">payments</span>
+<span class="floating-dollar material-symbols-outlined" style="left: 90%; bottom: -20%; font-size: 28px; animation: float 25s linear infinite 4s;">payments</span>
+<span class="floating-dollar material-symbols-outlined" style="left: 15%; bottom: -5%; font-size: 42px; animation: float 19s linear infinite 10s;">payments</span>
+<span class="floating-dollar material-symbols-outlined" style="left: 75%; bottom: -15%; font-size: 30px; animation: float 21s linear infinite 12s;">payments</span>
+</div>
+<div class="flex min-h-screen w-full flex-col">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between border-b border-border-dark px-6 py-4 lg:px-20 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center gap-2 text-primary">
+<div class="size-8 flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl">payments</span>
+</div>
+<h2 class="text-xl font-extrabold tracking-tight uppercase">EasyColoc</h2>
+</div>
+<div class="flex items-center gap-4">
+        <span class="hidden md:inline text-slate-400 text-sm">New here?</span>
+        <a href="{{ route('register') }}" class="flex min-w-[100px] items-center justify-center rounded-lg h-10 px-6 border border-primary/30 text-primary hover:bg-primary/10 transition-colors text-sm font-bold">
+            Register
+        </a>
+</div>
+</header>
+<main class="flex-1 flex items-center justify-center p-6">
+<div class="w-full max-w-[440px] space-y-8 py-12">
+                <div class="text-center md:text-left space-y-2">
+                    <h1 class="text-4xl md:text-5xl font-black tracking-tight text-slate-100">
+                        Welcome <span class="text-[#FFBD00FF]">Back</span>
+                    </h1>
+                    <p class="text-slate-400 text-lg">Access your premium roommate portal.</p>
+                </div>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+                <x-auth-session-status class="mb-4" :status="session('status')" />
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+                <form method="POST" action="{{ route('login') }}" class="space-y-6 bg-black/60 backdrop-blur-xl p-8 rounded-xl border border-primary/20 shadow-[0_0_50px_rgba(0,0,0,1)] relative z-10">
+                    @csrf
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+                    <div class="space-y-4">
+                        <div class="flex flex-col gap-2">
+                            <label for="email" class="text-sm font-semibold text-slate-300 ml-1">Email Address</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xl">mail</span>
+                                <input id="email" name="email" value="{{ old('email') }}" required autofocus
+                                       class="w-full pl-12 pr-4 py-4 rounded-lg bg-neutral-dark border border-border-dark focus:border-primary focus:ring-1  text-black placeholder:text-slate-600 transition-all outline-none" placeholder="name@company.com" type="email"/>
+                            </div>
+                            @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+                        <div class="flex flex-col gap-2">
+                            <div class="flex justify-between items-center px-1">
+                                <label for="password" class="text-sm font-semibold text-slate-300">Password</label>
+                                @if (Route::has('password.request'))
+                                    <a class="text-xs text-primary hover:underline" href="{{ route('password.request') }}">
+                                        Forgot?
+                                    </a>
+                                @endif
+                            </div>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xl">lock</span>
+                                <input id="password" name="password" required
+                                       class="w-full pl-12 pr-10 py-4 rounded-lg bg-neutral-dark border border-border-dark focus:border-primary focus:ring-1 focus:ring-primary text-black placeholder:text-slate-600 transition-all outline-none" placeholder="••••••••" type="password"/>
+                            </div>
+                            @error('password') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-background-dark font-extrabold py-4 rounded-lg shadow-[0_0_20px_rgba(227,188,59,0.2)] transition-all transform active:scale-[0.98]">
+                        LOG IN
+                    </button>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-border-dark"></div>
+                        <span class="flex-shrink mx-4 text-slate-600 text-[10px] uppercase tracking-widest font-bold">Secure Access</span>
+                        <div class="flex-grow border-t border-border-dark"></div>
+                    </div>
+                </form>
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+                <p class="text-center text-slate-500 text-sm">
+                    Don't have an account? <a class="text-primary font-bold hover:underline" href="{{ route('register') }}">Create one</a>
+                </p>
+            </div>
+</div>
+</main>
+<!-- Subtle Footer Elements -->
+<footer class="p-8 flex flex-col items-center gap-4 text-slate-600 text-xs border-t border-border-dark bg-neutral-dark/20">
+<div class="flex gap-6 uppercase tracking-widest">
+</div>
+<p> © 2024 EasyColoc YouCode . bakessou bilal</p>
+</footer>
+</div>
+<!-- Decorative Gradients -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,_rgba(227,188,59,0.05)_0%,_transparent_70%)]"></div>
+</div>
+</body></html>
+

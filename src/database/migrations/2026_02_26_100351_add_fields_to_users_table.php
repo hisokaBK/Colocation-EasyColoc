@@ -28,7 +28,7 @@ return new class extends Migration
                   'role',
                   'reputation_score',
                   'is_banned'
-             ])
+             ]);
         });
     }
 };
