@@ -22,13 +22,33 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request)
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = auth()->user();
+
+        if (session()->has('invitation_token')) {
+            $token = session('invitation_token');
+
+            $invitation = \App\Models\Invitation::where('token', $token)->first();
+
+            if ($invitation && $invitation->colocation->members->contains($user->id)) {
+                session()->forget('invitation_token');
+                return redirect()->route('user.dashboard')
+                    ->with('error', 'You are already a member of this colocation.');
+            }
+
+            session()->forget('invitation_token');
+            return redirect()->route('colocation.accept', $token);
+        }
+
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('profile.user');
     }
 
     /**

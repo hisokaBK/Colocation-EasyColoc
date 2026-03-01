@@ -72,4 +72,21 @@ class User extends Authenticatable
     public function paymentsReceived(){
         return $this->hasMany(Payment::class, 'to_user_id');
     }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function owner()
+{
+    return $this->hasOneThrough(
+        User::class,
+        Membership::class,
+        'colocation_id',
+        'id',
+        'id',
+        'user_id'
+    )->where('memberships.role', 'owner');
+}
 }

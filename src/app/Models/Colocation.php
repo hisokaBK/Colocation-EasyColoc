@@ -17,6 +17,18 @@ class Colocation extends Model
         return $this->hasMany(Membership::class);
     }
 
+    public function ownerMembership()
+    {
+        return $this->hasOne(Membership::class)
+            ->where('role', 'owner');
+    }
+
+    public function owner()
+    {
+        return $this->belongsToMany(User::class, 'memberships')
+            ->wherePivot('role', 'owner');
+    }
+
     public function members()
     {
         return $this->belongsToMany(
@@ -39,4 +51,14 @@ class Colocation extends Model
     {
         return $this->hasMany(Invitation::class);
     }
+
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
+
+    public function getOwnerUserAttribute()
+     {
+         return $this->owner()->first();
+     }
 }

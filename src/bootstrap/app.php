@@ -11,7 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+         $middleware->alias([
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'on_colocation' => \App\Http\Middleware\UserOntColocation::class,
+        'owner' => \App\Http\Middleware\IsOwner::class,
+        'colocation.active' => \App\Http\Middleware\CheckColocationActive::class,
+        'invitation' => \App\Http\Middleware\HandleInvitationToken::class,
+
+
+    ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
