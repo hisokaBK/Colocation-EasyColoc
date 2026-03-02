@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         'owner' => \App\Http\Middleware\IsOwner::class,
         'colocation.active' => \App\Http\Middleware\CheckColocationActive::class,
         'invitation' => \App\Http\Middleware\HandleInvitationToken::class,
+        'already.in.colocation' => \App\Http\Middleware\CheckAlreadyInColocation::class,
+        'not_banned' => \App\Http\Middleware\CheckIfBanned::class,
 
 
     ]);

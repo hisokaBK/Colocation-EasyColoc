@@ -79,14 +79,29 @@ class User extends Authenticatable
     }
 
     public function owner()
-{
-    return $this->hasOneThrough(
-        User::class,
-        Membership::class,
-        'colocation_id',
-        'id',
-        'id',
-        'user_id'
-    )->where('memberships.role', 'owner');
-}
+    {
+        return $this->hasOneThrough(
+            User::class,
+            Membership::class,
+            'colocation_id',
+            'id',
+            'id',
+            'user_id'
+        )->where('memberships.role', 'owner');
+    }
+
+    public function expenseSplits()
+    {
+        return $this->hasMany(ExpenseSplit::class);
+    }
+
+    public function debts()
+    {
+        return $this->hasMany(Balance::class, 'debtor_id');
+    }
+    
+    public function credits()
+    {
+        return $this->hasMany(Balance::class, 'creditor_id');
+    }
 }

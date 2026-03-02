@@ -6,7 +6,9 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\User\ColocationController;
 use App\Http\Controllers\User\DashboardController;
+use App\Http\Controllers\User\ExpenseController;
 use App\Http\Controllers\User\CategoryController;
+use App\Http\Controllers\User\BalanceController;
 
 
 Route::get('/', function () {
@@ -24,7 +26,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::middleware(['auth','admin'])
+Route::middleware(['auth','admin','not_banned'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -32,10 +34,14 @@ Route::middleware(['auth','admin'])
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
+        Route::patch(
+            '/users/{user}/toggle-ban',
+            [AdminDashboardController::class,'toggleBan']
+        )->name('users.toggleBan');
 });
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth','not_banned'])->group(function () {
 
     Route::get('/user/profile', [UserProfileController::class,'show'])
         ->name('profile.user');
@@ -52,7 +58,7 @@ Route::middleware('auth')->group(function () {
 
 });
 
-Route::middleware('auth')->prefix('user')->group(function () {
+Route::middleware(['auth','not_banned'])->prefix('user')->group(function () {
 
     Route::get('/colocation', [ColocationController::class, 'index'])
         ->name('user.colocation');
@@ -64,11 +70,11 @@ Route::middleware('auth')->prefix('user')->group(function () {
     ->name('colocation.show')->middleware('colocation.active');
 
     Route::post('/colocation', [ColocationController::class, 'store'])
-        ->name('colocation.store')->middleware('on_colocation');
+        ->name('colocation.store')->middleware('already.in.colocation');
 });
 
 
-Route::middleware(['auth','owner','colocation.active'])
+Route::middleware(['auth','owner','colocation.active','not_banned'])
     ->prefix('user')
     ->group(function () {
 
@@ -89,13 +95,34 @@ Route::middleware(['auth','owner','colocation.active'])
         )->name('colocation.member.remove');
 });
 
-Route::get('/join-colocation/{token}', [ColocationController::class, 'acceptInvitation'])
-    ->name('colocation.accept')
-    ->middleware('invitation');
+
 
 Route::delete(
     '/colocation/{colocation}/exit',
     [ColocationController::class, 'exit']
-)->name('colocation.exit')->middleware('auth');
+)->name('colocation.exit')->middleware(['auth','not_banned']);
+
+Route::middleware(['auth','not_banned'])
+    ->group(function () {
+       Route::post(
+           '/colocation/{id}/expense',
+           [ExpenseController::class, 'store']
+           )->name('expenses.store');
+
+        Route::put('/expenses/{expense}',
+        [ExpenseController::class,'update']
+           )->name('expenses.update');
+
+    Route::delete('/expenses/{expense}',
+        [ExpenseController::class,'destroy']
+         )->name('expenses.destroy');
+});
+
+Route::post('balances/{colocation}/{debtor}/settle', [BalanceController::class, 'settle'])
+    ->name('balances.settle');
+
+Route::get('/join-colocation/{token}', [ColocationController::class, 'acceptInvitation'])
+    ->name('colocation.accept')
+    ->middleware(['invitation','already.in.colocation','not_banned']);
 
 require __DIR__.'/auth.php';

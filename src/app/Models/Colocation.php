@@ -61,4 +61,9 @@ class Colocation extends Model
      {
          return $this->owner()->first();
      }
+
+    public function balances()
+    {
+        return $this->hasMany(Balance::class);
+    }
 }

@@ -83,7 +83,7 @@
 <span class="text-sm font-medium">ColocBoard</span>
 </a>
 
-<a href="/colocations" class="sidebar-item-active flex items-center gap-3 px-4 py-3 text-primary transition-colors" href="#">
+<a href="/user/colocation" class="sidebar-item-active flex items-center gap-3 px-4 py-3 text-primary transition-colors" href="#">
 <span class="material-symbols-outlined">home_work</span>
 <span class="text-sm font-semibold">Colocations</span>
 </a>
@@ -122,6 +122,13 @@
     {{ session('error') }}
 </div>
 @endif
+
+@if(session('success'))
+        <p class="text-green-500 text-sm m-5">
+            {{ session('success') }}
+        </p>
+@endif
+
 </section>
 <section class="flex flex-col gap-4">
 
@@ -160,7 +167,7 @@
 
     <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
         <span class="material-symbols-outlined text-primary">monetization_on</span>
-        <p>Total Expenses: ${{ number_format($colocation->expenses->sum('amount'), 2) }}</p>
+        <p>Total Expenses: {{ number_format($colocation->expenses->sum('amount'), 2) }} DH</p>
     </div>
 
     <div class="mt-4">
@@ -172,7 +179,7 @@
                     <span class="font-semibold">{{ $expense->title }}</span>
                     <span class="text-xs text-slate-500 dark:text-slate-400">{{ $expense->user->name ?? 'Unknown' }}</span>
                 </div>
-                <span class="font-bold text-primary">${{ number_format($expense->amount, 2) }}</span>
+                <span class="font-bold text-primary">{{ number_format($expense->amount, 2) }} DH</span>
             </li>
             @endforeach
         </ul>

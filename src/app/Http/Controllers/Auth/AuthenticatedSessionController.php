@@ -48,7 +48,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        return redirect()->route('profile.user');
+        return redirect()->route('user.dashboard');
     }
 
     /**

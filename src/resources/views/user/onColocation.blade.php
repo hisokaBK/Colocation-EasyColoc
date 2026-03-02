@@ -80,7 +80,6 @@
 <main class="flex-1 ov/user/colocation/boarderflow-y-auto p-10">
 
 <div class="p-10 space-y-8">
-
 <div class="flex flex-wrap justify-between items-center gap-4">
     <div>
         <h1 class="text-3xl font-black text-primary">
@@ -94,6 +93,13 @@
             </span>
         </p>
     </div>
+   <button onclick="openExpenseModal()"
+       class="bg-primary text-background-dark font-bold px-5 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition">
+
+       <span class="material-symbols-outlined">receipt_long</span>
+       Add Expense
+   </button>
+
   @if($colocation->ownerMembership->user->email== Auth::user()->email)
 
     <div class="flex flex-wrap gap-3">
@@ -223,7 +229,8 @@
                 <th class="px-6 py-4">Title</th>
                 <th class="px-6 py-4">Category</th>
                 <th class="px-6 py-4">Payer</th>
-                <th class="px-6 py-4 text-right">Amount</th>
+                <th class="px-6 py-4">Amount</th>
+                <th class="px-6 py-4 text-right">action</th>
             </tr>
             </thead>
 
@@ -255,11 +262,36 @@
 
                     </td>
 
-                    <td class="px-6 py-4 text-right font-bold text-primary">
-                        ${{ number_format($expense->amount,2) }}
+                    <td class="px-6 py-4  font-bold text-primary">
+                        {{ number_format($expense->amount,2) }} DH
                     </td>
+                   <td class="text-right">
+                        <div class="flex justify-end text-right gap-2">
 
+                             <button
+                                 onclick="openEditExpenseModal(
+                                     {{ $expense->id }},
+                                     '{{ $expense->title }}',
+                                     {{ $expense->amount }},
+                                     {{ $expense->category_id }},
+                                     '{{ $expense->date }}'
+                                 )"
+                                 class="p-2 rounded-lg  hover:bg-blue-500/10 text-slate-400/80 transition">
+
+                                 <span class="material-symbols-outlined">edit</span>
+                             </button>
+
+                             <button
+                                 onclick="openDeleteExpenseModal({{ $expense->id }}, '{{ $expense->title }}')"
+                                 class="p-2 rounded-lg hover:bg-red-500/10 text-slate-400/80 transition">
+
+                                 <span class="material-symbols-outlined">delete</span>
+                             </button>
+
+                         </div>
+                      </td>
                 </tr>
+
 
             @empty
 
@@ -278,6 +310,58 @@
     </div>
 
 </section>
+
+</div>
+
+<div class="mt-6 bg-background-dark border border-border-dark rounded-lg p-4">
+
+    <p class="text-md text-center text-primary font-semibold mb-4">
+        Members Balances
+    </p>
+
+    <div class="space-y-2">
+
+        @foreach($colocation->balances as $balance)
+
+            @php
+                $isDebt = $balance->debtor_id === auth()->id();
+                $isCredit = $balance->creditor_id === auth()->id();
+            @endphp
+
+            <div class="flex justify-between items-center
+                px-3 py-2 rounded-lg
+                {{ $isDebt ? 'bg-red-500/10' : 'bg-green-500/10' }}">
+
+                <span class="text-slate-300 text-sm">
+                    {{ $balance->debtor->name }}
+                    →
+                    {{ $balance->creditor->name }}
+                </span>
+
+                <div class="flex items-center gap-3">
+
+                    <span class="
+                        font-semibold
+                        {{ $isDebt ? 'text-red-400' : 'text-green-400' }}">
+                        {{ number_format($balance->amount,2) }} DH
+                    </span>
+
+                    @if($balance->creditor_id === auth()->id())
+                        <form method="POST"
+                              action="{{ route('balances.settle', ['colocation' => $colocation->id, 'debtor' => $balance->debtor_id]) }}">
+                            @csrf
+                            <button type="submit" class="text-xs bg-primary px-3 py-1 rounded-md hover:opacity-80">
+                                Settle
+                            </button>
+                        </form>
+                    @endif
+
+                </div>
+            </div>
+
+        @endforeach
+
+    </div>
 
 </div>
 
@@ -473,6 +557,267 @@ class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
     </div>
 </div>
 
+<!-- ADD EXPENSE MODAL -->
+<div id="expenseModal"
+     class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+
+    <div class="bg-panel-dark border border-border-dark rounded-xl w-[450px] p-6 space-y-6 shadow-xl">
+
+        <h2 class="text-lg font-bold text-white">
+            Add Expense
+        </h2>
+
+        <form method="POST"
+              action="{{ route('expenses.store', $colocation->id) }}"
+              class="space-y-4">
+
+            @csrf
+
+            <input type="text" name="title"
+                placeholder="Expense title"
+                required
+                class="w-full px-4 py-2 rounded-lg
+                       bg-background-dark
+                       border border-border-dark
+                       text-slate-200
+                       placeholder:text-slate-500
+                       focus:outline-none
+                       focus:ring-2 focus:ring-primary
+                       focus:border-primary transition">
+
+            <input type="number" step="0.01" name="amount"
+                placeholder="Amount"
+                required
+                class="w-full px-4 py-2 rounded-lg
+                       bg-background-dark
+                       border border-border-dark
+                       text-slate-200
+                       placeholder:text-slate-500
+                       focus:outline-none
+                       focus:ring-2 focus:ring-primary
+                       focus:border-primary transition">
+
+            <select name="category_id"
+                class="w-full px-4 py-2 rounded-lg
+                       bg-background-dark
+                       border border-border-dark
+                       text-slate-200
+                       focus:outline-none
+                       focus:ring-2 focus:ring-primary
+                       focus:border-primary transition"
+                required>
+
+                <option value="" class="bg-panel-dark text-slate-400">
+                    Select category
+                </option>
+
+                @foreach($colocation->categories as $category)
+                    <option value="{{ $category->id }}"
+                        class="bg-panel-dark text-white">
+                        {{ $category->name }}
+                    </option>
+                @endforeach
+            </select>
+
+            <input type="date" name="date"
+                required
+                class="w-full px-4 py-2 rounded-lg
+                       bg-background-dark
+                       border border-border-dark
+                       text-white
+                       focus:outline-none
+                       focus:ring-2 focus:ring-primary
+                       focus:border-primary transition">
+
+            <div class="flex justify-end gap-3 pt-2">
+
+                <button type="button"
+                    onclick="closeExpenseModal()"
+                    class="px-4 py-2 rounded-lg
+                           border border-border-dark
+                           text-slate-300
+                           hover:bg-border-dark
+                           transition">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                    class="px-4 py-2 rounded-lg
+                           bg-primary
+                           text-background-dark
+                           font-semibold
+                           hover:opacity-90 transition">
+                    Add
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{{-- update expense --}}
+<div id="editExpenseModal"
+class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50">
+
+<div class="bg-[#111827] border border-[#1f2937] rounded-2xl w-[450px] p-6 space-y-6 shadow-2xl">
+
+<h2 class="text-xl font-semibold text-slate-100">
+    Update Expense
+</h2>
+
+<form id="editExpenseForm" method="POST" class="space-y-4">
+@csrf
+@method('PUT')
+
+<input id="edit_title" name="title"
+placeholder="Expense title"
+class="w-full px-4 py-2 rounded-lg
+bg-[#0b1220]
+border border-[#1f2937]
+text-slate-200
+placeholder-slate-500
+focus:outline-none
+focus:ring-2 focus:ring-primary
+focus:border-primary
+transition"
+required>
+
+<input id="edit_amount" name="amount" type="number" step="0.01"
+placeholder="Amount"
+class="w-full px-4 py-2 rounded-lg
+bg-[#0b1220]
+border border-[#1f2937]
+text-slate-200
+placeholder-slate-500
+focus:outline-none
+focus:ring-2 focus:ring-primary
+focus:border-primary
+transition"
+required>
+
+<select id="edit_category" name="category_id"
+class="w-full px-4 py-2 rounded-lg
+bg-[#0b1220]
+border border-[#1f2937]
+text-slate-200
+focus:outline-none
+focus:ring-2 focus:ring-primary
+focus:border-primary
+transition"
+required>
+
+<option value="" class="text-slate-400">Select category</option>
+
+@foreach($colocation->categories as $category)
+<option value="{{ $category->id }}" class="bg-[#111827]">
+{{ $category->name }}
+</option>
+@endforeach
+
+</select>
+
+<input id="edit_date" type="date" name="date"
+class="w-full px-4 py-2 rounded-lg
+bg-[#0b1220]
+border border-[#1f2937]
+text-slate-200
+focus:outline-none
+focus:ring-2 focus:ring-primary
+focus:border-primary
+transition"
+required>
+
+<div class="flex justify-end gap-3 pt-2">
+
+<button type="button"
+onclick="closeEditExpenseModal()"
+class="px-4 py-2 rounded-lg
+border border-[#1f2937]
+text-slate-300
+hover:bg-[#1f2937]
+transition">
+Cancel
+</button>
+
+<button type="submit"
+class="px-4 py-2 rounded-lg
+bg-primary
+text-background-dark
+font-semibold
+hover:opacity-90
+transition">
+Update
+</button>
+
+</div>
+
+</form>
+</div>
+</div>
+
+{{-- delete expense --}}
+<div id="deleteExpenseModal"
+class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+
+<div class="bg-panel-dark border border-border-dark rounded-xl w-[400px] p-6 space-y-6">
+
+<h2 class="text-lg font-bold text-white">
+Delete Expense
+</h2>
+
+<p class="text-slate-400">
+Delete
+<span id="expenseName" class="text-primary font-semibold"></span> ?
+</p>
+
+<form id="deleteExpenseForm" method="POST">
+@csrf
+@method('DELETE')
+
+<div class="flex justify-end gap-3">
+
+<button type="button"
+onclick="closeDeleteExpenseModal()"
+class="px-4 py-2 border border-border-dark rounded-lg text-slate-300">
+Cancel
+</button>
+
+<button type="submit"
+class="px-4 py-2 bg-red-500 text-white rounded-lg">
+Delete
+</button>
+
+</div>
+</form>
+
+</div>
+</div>
+
+
+
+@if(session('success'))
+<div id="successAlert"
+     class="fixed top-5 right-5 z-50
+            flex justify-between items-center gap-4
+            bg-green-500/10 border border-green-500/30
+            text-green-400 text-sm
+            px-4 py-3 rounded-lg shadow-lg
+            backdrop-blur-md min-w-[260px]">
+
+    <span>
+        {{ session('success') }}
+    </span>
+
+    <button onclick="closeSuccessAlert()"
+            class="text-green-400 hover:text-white font-bold text-lg leading-none">
+        ✕
+    </button>
+
+</div>
+@endif
+
 <script>
 function openCategoryModal() {
     document.getElementById('categoryModal')
@@ -552,5 +897,69 @@ function closeExitModal() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
 }
+
+function openExpenseModal() {
+    const modal = document.getElementById('expenseModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeExpenseModal() {
+    const modal = document.getElementById('expenseModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function openEditExpenseModal(id, title, amount, category, date) {
+
+    const modal = document.getElementById('editExpenseModal');
+    const form = document.getElementById('editExpenseForm');
+
+    form.action = `/expenses/${id}`;
+
+    document.getElementById('edit_title').value = title;
+    document.getElementById('edit_amount').value = amount;
+    document.getElementById('edit_category').value = category;
+    document.getElementById('edit_date').value = date;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeEditExpenseModal() {
+    const modal = document.getElementById('editExpenseModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function openDeleteExpenseModal(id, name) {
+
+    const modal = document.getElementById('deleteExpenseModal');
+    const form = document.getElementById('deleteExpenseForm');
+
+    document.getElementById('expenseName').textContent = name;
+    form.action = `/expenses/${id}`;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeDeleteExpenseModal() {
+    const modal = document.getElementById('deleteExpenseModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+
+function closeSuccessAlert() {
+    const alert = document.getElementById('successAlert');
+    if(alert){
+        alert.style.opacity = "0";
+        alert.style.transform = "translateY(-10px)";
+        setTimeout(() => alert.remove(), 300);
+    }
+}
+
+setTimeout(closeSuccessAlert, 6000);
 </script>
 </body></html>

@@ -12,6 +12,7 @@ use App\Mail\ColocationInvitation;
 use Illuminate\Support\Str;
 use App\Models\Invitation;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Balance;
 
 class ColocationController extends Controller
 {
@@ -54,7 +55,7 @@ class ColocationController extends Controller
 
         return redirect()
             ->route('user.colocation')
-            ->with('success', 'Colocation created successfully ✅');
+            ->with('success', 'Colocation created successfully ');
     }
 
 
@@ -63,13 +64,14 @@ class ColocationController extends Controller
         $user = Auth::user();
 
         $colocation = Colocation::with([
-            'ownerMembership.user',
             'members',
             'categories',
             'expenses.user',
-            'expenses.category'
-        ])
-        ->findOrFail($id);
+            'expenses.category',
+            'expenses.splits.user',
+            'balances.creditor',
+            'balances.debtor'
+        ])->findOrFail($id);
 
         abort_if(
             !$colocation->members->contains($user->id),
@@ -102,9 +104,9 @@ class ColocationController extends Controller
     public function inviteMember(Request $request, $id)
     {
         $colocation = auth()->user()
-    ->colocations()
-    ->where('colocations.id', $id)
-    ->firstOrFail();
+          ->colocations()
+          ->where('colocations.id', $id)
+          ->firstOrFail();
 
         $token = Str::random(32);
 
@@ -167,27 +169,37 @@ class ColocationController extends Controller
     }
 
     public function exit(Colocation $colocation)
-    {
-        $user = Auth::user();
-
-        $membership = Membership::where('colocation_id', $colocation->id)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (!$membership) {
-            abort(403);
-        }
-
-        if ($membership->role === 'owner') {
-            return back()->with('error',
-                'Owner cannot leave the colocation.');
-        }
-
-        $membership->delete();
-
-        return redirect()
-            ->route('user.colocation')
-            ->with('success', 'You left the colocation successfully.');
-    }
+     {
+         $user = Auth::user();
+     
+         $membership = Membership::where('colocation_id', $colocation->id)
+             ->where('user_id', $user->id)
+             ->first();
+     
+         if (!$membership) {
+             abort(403);
+         }
+     
+         if ($membership->role === 'owner') {
+             return back()->with('error',
+                 'Owner cannot leave the colocation.');
+         }
+     
+         $hasDebt = Balance::where('colocation_id', $colocation->id)
+             ->where('debtor_id', $user->id)
+             ->exists();
+     
+         if ($hasDebt) {
+             $user->decrement('reputation_score', 1);
+         } else {
+             $user->increment('reputation_score', 1);
+         }
+     
+         $membership->delete();
+     
+         return redirect()
+             ->route('user.colocation')
+             ->with('success', 'You left the colocation successfully.');
+     }
 
 }

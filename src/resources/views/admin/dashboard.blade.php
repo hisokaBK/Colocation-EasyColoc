@@ -166,7 +166,7 @@
 <th class="px-6 py-4">Username</th>
 <th class="px-6 py-4">Email</th>
 <th class="px-6 py-4">Reputation</th>
-<th class="px-6 py-4">Role</th>
+<th class="px-6 py-4">On Coloc</th>
 <th class="px-6 py-4 text-right">Actions</th>
 </tr>
 </thead>
@@ -198,11 +198,26 @@
 @endif</td>
 <td class="px-6 py-4 text-right">
 <div class="flex items-center justify-end gap-2">
-@if(!$user->is_banned)
-    <button class="bg-primary text-background-dark px-3 py-1 rounded-md text-xs font-bold hover:bg-primary/90 transition-colors">Ban</button>
-@else
-    <button class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 px-3 py-1 rounded-md text-xs font-bold hover:bg-primary transition-colors">Unban</button>
-@endif
+<form method="POST" action="{{ route('admin.users.toggleBan', $user->id) }}">
+    @csrf
+    @method('PATCH')
+
+    @if($user->role !== 'admin')
+        @if(!$user->is_banned)
+            <button
+                class="bg-primary text-background-dark px-3 py-1 rounded-md text-xs font-bold hover:bg-primary/90 transition-colors">
+                Ban
+            </button>
+        @else
+            <button
+                class="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 px-3 py-1 rounded-md text-xs font-bold hover:bg-primary transition-colors">
+                Unban
+            </button>
+        @endif
+
+    @endif
+    
+</form>
 </div>
 </td>
 </tr>

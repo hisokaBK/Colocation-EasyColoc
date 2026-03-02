@@ -21,7 +21,7 @@ class AdminDashboardController extends Controller
 
         $totalExpenses = Expense::sum('amount');
 
-        $users = User::latest()->paginate(1);
+        $users = User::latest()->paginate(5);
 
         return view('admin.dashboard', compact(
             'totalUsers',
@@ -31,5 +31,23 @@ class AdminDashboardController extends Controller
             'totalExpenses',
             'users'
         ));
+    }
+
+
+    public function toggleBan(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot ban yourself.');
+        }
+
+        $user->is_banned = !$user->is_banned;
+        $user->save();
+
+        return back()->with(
+            'success',
+            $user->is_banned
+                ? 'User banned successfully.'
+                : 'User unbanned successfully.'
+        );
     }
 }
